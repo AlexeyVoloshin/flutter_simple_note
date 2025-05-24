@@ -26,7 +26,7 @@ class EditorScreenState extends State<EditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Editor notes')),
+      appBar: AppBar(),
       body: Container(
         padding: const EdgeInsets.all(20),
         child: Center(

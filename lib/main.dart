@@ -7,7 +7,11 @@ Future<void> main() async {
   await Hive.initFlutter(); // init Hive
   await Hive.openBox<String>('notes'); // Open box for notes
 
-  runApp(MaterialApp(home: HomeScreen()));
+  runApp(MaterialApp(
+    theme: ThemeData(
+      fontFamily: 'Roboto',
+    ),
+    home: HomeScreen()));
 }
 
 
