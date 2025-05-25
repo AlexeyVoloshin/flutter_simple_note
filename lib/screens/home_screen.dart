@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:hello_flutter/color_bloc.dart';
 import 'package:hello_flutter/screens/detail_screen.dart';
 import 'package:hello_flutter/widgets/card_note.dart';
 import '../widgets/search_text_field.dart';
@@ -97,9 +99,13 @@ class HomeScreenState extends State<HomeScreen> {
                             showModalBottomSheet(
                               context: context,
                               builder: (context) {
-                                return ShowModalBottomSheet(
-                                  onDelete: () => _deleteNote(note),
-                                  onEdit: () => _editNote(note),
+                                return BlocProvider.value(
+                                  value: BlocProvider.of<ColorBloc>(context),
+                                  child: ShowModalBottomSheet(
+                                    onDelete: () => _deleteNote(note),
+                                    onEdit: () => _editNote(note), 
+                                    onPressed: (indexColor) => _changeColor(note, indexColor),
+                                  ),
                                 );
                               },
                             );
@@ -135,6 +141,12 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _changeColor(Note note, int index) async {
+    note.colorValue = ColorNote.values[index].color;
+    await NoteStorageService.updateNote(note, note.title, note.description, note.colorValue);
+    refreshNotes();
+  }
+
   Future<void> _deleteNote(Note note) async {
     await NoteStorageService.deleteNote(note);
     refreshNotes();
@@ -147,7 +159,7 @@ class HomeScreenState extends State<HomeScreen> {
         builder: (context) => EditorScreen(
           note: note,
           onSave: (String title, String description) async {
-            await NoteStorageService.updateNote(note, title, description);
+            await NoteStorageService.updateNote(note, title, description, note.colorValue);
             setState(() {
               refreshNotes();
             });
@@ -165,6 +177,7 @@ class HomeScreenState extends State<HomeScreen> {
           note: null,
           onSave: (String title, String description) {
             final newNote = Note(title: title, description: description);
+            newNote.colorValue = ColorNote.colorDefault.color;
             NoteStorageService.addNote(newNote);
             setState(() {
               refreshNotes();

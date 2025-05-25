@@ -15,9 +15,10 @@ class NoteStorageService {
   }
 
   /// Оновити нотатку (через об'єкт)
-  static Future<void> updateNote(Note note, String newTitle, String newDescription) async {
+  static Future<void> updateNote(Note note, String newTitle, String newDescription, int colorValue) async {
     note.title = newTitle;
     note.description = newDescription;
+    note.colorValue = colorValue;
     await note.save();
   }
 
