@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hello_flutter/models/note.dart';
-import 'package:hello_flutter/widgets/note_form.dart';
+import 'package:hello_flutter/widgets/form_note.dart';
 
 class EditorScreen extends StatefulWidget {
   final Note? note;
@@ -47,7 +47,7 @@ class EditorScreenState extends State<EditorScreen> {
       appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: NoteForm(
+        child: FormNote(
           formKey: _formKey, 
           titleController: _titleController, 
           descriptionController: _descriptionController, 

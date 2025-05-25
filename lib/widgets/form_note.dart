@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class NoteForm extends StatelessWidget {
+class FormNote extends StatelessWidget {
   final GlobalKey<FormState> formKey;
 
   final TextEditingController titleController;
@@ -9,7 +9,7 @@ class NoteForm extends StatelessWidget {
 
   final VoidCallback submitForm;
 
-  const NoteForm({
+  const FormNote({
     super.key,
     required this.formKey,
     required this.titleController,

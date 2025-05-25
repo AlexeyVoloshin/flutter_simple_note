@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hello_flutter/screens/detail_screen.dart';
+import 'package:hello_flutter/widgets/card_note.dart';
 import '../widgets/search_text_field.dart';
 import 'editor_screen.dart';
 import '../services/note_storage_service.dart';
@@ -67,7 +69,9 @@ class HomeScreenState extends State<HomeScreen> {
                 },
                 onSubmitted: (value) {
                   final query = value.trim().toLowerCase();
-                  if (filteredNotesList.isEmpty || query.isEmpty) refreshNotes();
+                  if (filteredNotesList.isEmpty || query.isEmpty) {
+                    refreshNotes();
+                  }
                   _searchController.text = '';
                 },
                 controller: _searchController,
@@ -76,55 +80,41 @@ class HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: filteredNotesList.isEmpty
                   ? Center(child: Text('Notes is empty'))
-                  : GridView.count(
-                      crossAxisCount: 2,
-                      children: List.generate(filteredNotesList.length, (
-                        index,
-                      ) {
-                        final note = filteredNotesList[index];
-                        return  Card(
-                          child: ListTile(
-                            tileColor: Colors.grey[000063],
-                            title: Text(
-                              note.title,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            ),
-                            subtitle: Text(
-                              note.description,
-                              maxLines: 10,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12,
-                              ),
-                              ),
-                            onLongPress: () {
-                              showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return ShowModalBottomSheet(
-                                    onDelete: () => _deleteNote(note),
-                                    onEdit: () => _editNote(note),
-                                  );
-                                },
-                              );
-                            },
-                            onTap: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailScreen(noteDetail: note),
-                                ),
-                              );
-                            },
+                  : MasonryGridView.builder(
+                      crossAxisSpacing: 18,
+                      mainAxisSpacing: 18,
+                      gridDelegate:
+                          SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
                           ),
+                      itemCount: filteredNotesList.length,
+                      itemBuilder: (context, index) {
+                        final note = filteredNotesList[index];
+
+                        return CardNote(
+                          note: note,
+                          onLongPress: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return ShowModalBottomSheet(
+                                  onDelete: () => _deleteNote(note),
+                                  onEdit: () => _editNote(note),
+                                );
+                              },
+                            );
+                          },
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailScreen(noteDetail: note),
+                              ),
+                            );
+                          },
                         );
-                      }),
+                      },
                     ),
             ),
           ],
