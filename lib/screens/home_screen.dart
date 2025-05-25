@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hello_flutter/screens/detail_screen.dart';
+import '../widgets/search_text_field.dart';
 import 'editor_screen.dart';
-import '../services/note_storage.dart';
+import '../services/note_storage_service.dart';
 import '../widgets/show_modal_bottom_sheet.dart';
+import 'package:hello_flutter/models/note.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,15 +14,29 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  final storNotes = NoteStorageService.loadNotes();
-  final Map<dynamic, String> notesMap = {};
-  final TextEditingController _controller = TextEditingController();
+  List<Note> allNotesList = [];
+  List<Note> filteredNotesList = [];
+
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    storNotes.forEach((key, value) {
-      notesMap[key] = value;
+
+    allNotesList = NoteStorageService.loadNotes();
+    filteredNotesList = List.from(allNotesList);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void refreshNotes() {
+    setState(() {
+      allNotesList = NoteStorageService.loadNotes();
+      filteredNotesList = List.from(allNotesList);
     });
   }
 
@@ -44,89 +60,72 @@ class HomeScreenState extends State<HomeScreen> {
           children: [
             Padding(
               padding: EdgeInsets.only(bottom: 18, top: 18),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Color(0xFF7C7C7C)),
-                  hintStyle: TextStyle(color: Color(0xFFABABAB)),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Color(0xFFECECEC), width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue, width: 1),
-                  ),
-                  hintText: 'Search for notes',
-                ),
-                controller: _controller,
-                onSubmitted: (value) => _searchNotes(value),
+              child: SearchTextField(
+                onChanged: (String value) {
+                  final query = value.trim().toLowerCase();
+                  filterNotes(query);
+                },
+                onSubmitted: (value) {
+                  final query = value.trim().toLowerCase();
+                  if (filteredNotesList.isEmpty || query.isEmpty) refreshNotes();
+                  _searchController.text = '';
+                },
+                controller: _searchController,
               ),
             ),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                children: List.generate(notesMap.length, (index) {
-                  final key = notesMap.keys.elementAt(index);
-                  final note = notesMap[key]!;
-                  return Card(
-                    child: ListTile(
-                      tileColor: Colors.grey[000063],
-                      title: Text(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        note,
-                      ),
-                      onLongPress: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return ShowModalBottomSheet(
-                              onDelete: () async {
-                                Navigator.pop(context);
-                                setState(() {
-                                  notesMap.remove(key);
-                                });
-                                await NoteStorageService.deleteNote(key);
-                              },
-                              onEdit: () async {
-                                final editedNote = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditorScreen(note: note),
-                                  ),
-                                );
-
-                                if (editedNote != null &&
-                                    editedNote is String) {
-                                  setState(() {
-                                    notesMap[key] = editedNote.trim();
-                                  });
-                                  await NoteStorageService.updateNote(
-                                    key,
-                                    editedNote.trim(),
+              child: filteredNotesList.isEmpty
+                  ? Center(child: Text('Notes is empty'))
+                  : GridView.count(
+                      crossAxisCount: 2,
+                      children: List.generate(filteredNotesList.length, (
+                        index,
+                      ) {
+                        final note = filteredNotesList[index];
+                        return  Card(
+                          child: ListTile(
+                            tileColor: Colors.grey[000063],
+                            title: Text(
+                              note.title,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            subtitle: Text(
+                              note.description,
+                              maxLines: 10,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
+                              ),
+                            onLongPress: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return ShowModalBottomSheet(
+                                    onDelete: () => _deleteNote(note),
+                                    onEdit: () => _editNote(note),
                                   );
-                                }
-                              },
-                            );
-                          },
-                        );
-                      },
-                      onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailScreen(noteDetail: note),
+                                },
+                              );
+                            },
+                            onTap: () async {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailScreen(noteDetail: note),
+                                ),
+                              );
+                            },
                           ),
                         );
-                      },
+                      }),
                     ),
-                  );
-                }),
-              ),
             ),
           ],
         ),
@@ -139,27 +138,60 @@ class HomeScreenState extends State<HomeScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(100),
           ),
-          onPressed: () => _addNewNote(),
+          onPressed: _addNewNote,
           child: Icon(Icons.add, color: Colors.white, size: 38),
         ),
       ),
     );
   }
 
-  Future<void> _addNewNote() async {
-    final newNote = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EditorScreen(note: '')),
-    );
-
-    if (newNote != null && newNote != '' && newNote is String) {
-      final newKey = await NoteStorageService.addNote(newNote.trim());
-
-      setState(() {
-        notesMap[newKey] = newNote.trim();
-      });
-    }
+  Future<void> _deleteNote(Note note) async {
+    await NoteStorageService.deleteNote(note);
+    refreshNotes();
   }
 
-  void _searchNotes(String value) {}
+  Future<void> _editNote(Note note) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditorScreen(
+          note: note,
+          onSave: (String title, String description) async {
+            await NoteStorageService.updateNote(note, title, description);
+            setState(() {
+              refreshNotes();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addNewNote() async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditorScreen(
+          note: null,
+          onSave: (String title, String description) {
+            final newNote = Note(title: title, description: description);
+            NoteStorageService.addNote(newNote);
+            setState(() {
+              refreshNotes();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  void filterNotes(String value) {
+    final query = value.toLowerCase();
+    final filteredNotes = allNotesList.where(
+      (note) => note.title.toLowerCase().contains(query),
+    );
+    setState(() {
+      filteredNotesList = List.from(filteredNotes);
+    });
+  }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-enum NoteOption { edit, delete }
-
 class ShowModalBottomSheet extends StatelessWidget {
   final VoidCallback onDelete;
   final VoidCallback onEdit;

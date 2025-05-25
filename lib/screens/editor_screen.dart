@@ -1,68 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:hello_flutter/models/note.dart';
+import 'package:hello_flutter/widgets/note_form.dart';
 
 class EditorScreen extends StatefulWidget {
-  final String note;
-  const EditorScreen({super.key, required this.note});
+  final Note? note;
+  final Function(String title, String description) onSave;
+
+  const EditorScreen({super.key,  required this.note, required this.onSave});
 
   @override
   EditorScreenState createState() => EditorScreenState();
 }
 
 class EditorScreenState extends State<EditorScreen> {
-  late TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+  var _titleController = TextEditingController();
+  var _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.note);
+    _titleController = TextEditingController(text: widget.note?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.note?.description ?? '');
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
     super.dispose();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      widget.onSave(
+        _titleController.text.trim(),
+        _descriptionController.text.trim(),
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter your a note',
-                ),
-                controller: _controller,
-                onSubmitted: (value) => _saveNote(value),
-              ),
-              SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _saveNote(_controller.text),
-                  child: Text(
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    'Save',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: NoteForm(
+          formKey: _formKey, 
+          titleController: _titleController, 
+          descriptionController: _descriptionController, 
+          submitForm: _submitForm)
       ),
     );
-  }
-
-  void _saveNote(value) {
-    Navigator.pop(context, value);
   }
 }

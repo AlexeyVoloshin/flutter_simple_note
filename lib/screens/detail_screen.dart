@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hello_flutter/models/note.dart';
 
 class DetailScreen extends StatelessWidget {
-  final dynamic noteDetail;
+  final Note noteDetail;
 
   const DetailScreen({super.key, required this.noteDetail});
 
@@ -9,17 +10,30 @@ class DetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
+      body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Center(
-          child: Text(
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 24,
+                ),
+                noteDetail.title,
+              ),
             ),
-            noteDetail,
-          ),
+            SizedBox(height: 16),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                style: TextStyle(color: Colors.black, fontSize: 18),
+                noteDetail.description,
+              ),
+            ),
+          ],
         ),
       ),
     );
