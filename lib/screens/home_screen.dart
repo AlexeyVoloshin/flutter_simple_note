@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:hello_flutter/color_bloc.dart';
+import 'package:hello_flutter/blocs/color_bloc.dart';
 import 'package:hello_flutter/screens/detail_screen.dart';
 import 'package:hello_flutter/widgets/card_note.dart';
 import '../widgets/search_text_field.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hello_flutter/color_bloc.dart';
+import 'package:hello_flutter/blocs/color_bloc.dart';
 import 'package:hello_flutter/models/note.dart';
 import 'package:hello_flutter/screens/home_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';

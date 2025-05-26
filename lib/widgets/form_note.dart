@@ -54,9 +54,22 @@ class FormNote extends StatelessWidget {
               },
             ),
           ),
-
-          SizedBox(height: 24),
-          ElevatedButton(onPressed: submitForm, child: Text('Save')),
+          SizedBox(
+            width: 61,
+            height: 61,
+            child:
+             FloatingActionButton(
+              backgroundColor: Color(0xFF1F2937),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(100),
+              ),
+              onPressed: submitForm,
+              child: Text(
+                'Save',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white),
+              ),
+            ),
+          ),
         ],
       ),
     );

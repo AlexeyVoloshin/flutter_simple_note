@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hello_flutter/color_bloc.dart';
+import 'package:hello_flutter/blocs/color_bloc.dart';
 import 'package:hello_flutter/models/note.dart';
 
 class ShowModalBottomSheet extends StatelessWidget {
@@ -28,14 +28,13 @@ class ShowModalBottomSheet extends StatelessWidget {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(bottom: 5),
-              child: 
-              Text(
+              child: Text(
                 'Select color',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(
-              height: 40,
+              height: 50,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
@@ -56,17 +55,13 @@ class ShowModalBottomSheet extends StatelessWidget {
                           onPressed(index);
                           Navigator.pop(context);
                         },
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                        ),
+                        child: SizedBox(width: 40, height: 40),
                       ),
                     ),
                   );
                 },
               ),
             ),
-
             ListTile(
               leading: Icon(Icons.edit),
               title: Text(
